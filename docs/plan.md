@@ -65,15 +65,15 @@
 
 ### Checklist Tugas
 
-- [ ] Buat `api/schemas/kk_schema.py`:
+- [x] Buat `api/schemas/kk_schema.py`:
   - `AnggotaBase`, `AnggotaCreate`, `AnggotaUpdate`, `AnggotaResponse`
   - `IdentitasKKBase`, `IdentitasKKCreate`, `IdentitasKKUpdate`, `IdentitasKKResponse`
   - `KKExtractionResponse` (berisi `identitas` dan `anggota: list[...]`)
   - Normalisasi field tanggal (`YYYY-MM-DD` atau `None` jika kosong/`-`).
-- [ ] Buat `api/services/ocr_service.py`:
-  - Gunakan `google-genai` (`gemini-2.5-flash`) dengan `response_mime_type="application/json"` dan `response_schema=KKExtractionResponse`.
+- [x] Buat `api/services/ocr_service.py`:
+  - Gunakan `google-genai` (`gemini-3.8-flash`) dengan `response_mime_type="application/json"` dan `response_schema=KKExtractionResponse`.
   - Pastikan prompt sistem menginstruksikan pembacaan akurat untuk seluruh kolom KK Indonesia (termasuk menangani nilai `-` atau kosong).
-- [ ] Buat `api/routers/extract.py` dengan endpoint `POST /api/py/extract`:
+- [x] Buat `api/routers/extract.py` dengan endpoint `POST /api/py/extract`:
   - Validasi tipe file (JPG, PNG, WEBP) dan ukuran maksimal 5 MB.
   - Daftarkan router ke `api/index.py`.
 
