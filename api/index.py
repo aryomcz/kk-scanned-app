@@ -1,10 +1,13 @@
 from fastapi import FastAPI, HTTPException
 from api.core.config import get_supabase
+from api.routers.extract import router as extract_router
 
 app = FastAPI(
     docs_url="/api/py/docs",
     openapi_url="/api/py/openapi.json",
 )
+
+app.include_router(extract_router)
 
 
 @app.get("/api/py/health")
