@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import APIRouter, File, HTTPException, UploadFile
 from google.genai import errors as genai_errors
 from api.schemas.kk_schema import KKExtractionResponse
@@ -29,7 +30,7 @@ async def extract_kk(file: UploadFile = File(...)):
 
     mime_type = "image/jpeg" if content_type == "image/jpg" else content_type
     try:
-        return extract_kk_data(image_bytes, mime_type)
+        return await asyncio.to_thread(extract_kk_data, image_bytes, mime_type)
     except genai_errors.APIError as e:
         code = getattr(e, "code", None)
         status = code if code in (429, 503) else 502

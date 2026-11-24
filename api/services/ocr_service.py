@@ -26,7 +26,7 @@ def extract_kk_data(image_bytes: bytes, mime_type: str) -> KKExtractionResponse:
     for attempt in range(3):
         try:
             response = client.models.generate_content(
-                model="gemini-3.8-flash",
+                model="gemini-3.5-flash",
                 contents=[
                     types.Part.from_bytes(data=image_bytes, mime_type=mime_type),
                     SYSTEM_PROMPT,
