@@ -114,10 +114,40 @@ class AnggotaUpdate(BaseModel):
     nama_ayah: str | None = None
     nama_ibu: str | None = None
 
+    @field_validator("nik", mode="before")
+    @classmethod
+    def validate_nik(cls, v: Any) -> str | None:
+        return None if v is None else _clean_digits(v)
+
+    @field_validator("nama_lengkap", mode="before")
+    @classmethod
+    def validate_nama(cls, v: Any) -> str | None:
+        return None if v is None else (_clean_str(v) or "")
+
     @field_validator("tanggal_lahir", "tanggal_perkawinan", mode="before")
     @classmethod
     def validate_dates(cls, v: Any) -> str | None:
         return _normalize_date(v)
+
+    @field_validator(
+        "jenis_kelamin",
+        "tempat_lahir",
+        "agama",
+        "pendidikan",
+        "jenis_pekerjaan",
+        "golongan_darah",
+        "status_perkawinan",
+        "status_hubungan_keluarga",
+        "kewarganegaraan",
+        "no_paspor",
+        "no_kitap",
+        "nama_ayah",
+        "nama_ibu",
+        mode="before",
+    )
+    @classmethod
+    def validate_optional_text(cls, v: Any) -> str | None:
+        return None if v is None else _clean_str(v)
 
 
 class AnggotaResponse(AnggotaBase):
@@ -179,6 +209,31 @@ class IdentitasKKUpdate(BaseModel):
     provinsi: str | None = None
     image_url: str | None = None
 
+    @field_validator("no_kk", mode="before")
+    @classmethod
+    def validate_no_kk(cls, v: Any) -> str | None:
+        return None if v is None else _clean_digits(v)
+
+    @field_validator("nama_kepala_keluarga", mode="before")
+    @classmethod
+    def validate_kepala(cls, v: Any) -> str | None:
+        return None if v is None else (_clean_str(v) or "")
+
+    @field_validator(
+        "alamat",
+        "rt_rw",
+        "kode_pos",
+        "desa_kelurahan",
+        "kecamatan",
+        "kabupaten_kota",
+        "provinsi",
+        "image_url",
+        mode="before",
+    )
+    @classmethod
+    def validate_optional_text(cls, v: Any) -> str | None:
+        return None if v is None else _clean_str(v)
+
 
 class IdentitasKKResponse(IdentitasKKBase):
     id: str
@@ -192,3 +247,9 @@ class IdentitasKKResponse(IdentitasKKBase):
 class KKExtractionResponse(BaseModel):
     identitas: IdentitasKKBase
     anggota: list[AnggotaBase]
+
+
+class KKCreateRequest(BaseModel):
+    identitas: IdentitasKKCreate
+    anggota: list[AnggotaCreate] = []
+    image_base64: str | None = None
