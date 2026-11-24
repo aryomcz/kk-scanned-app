@@ -175,10 +175,10 @@
 
 ### Checklist Tugas
 
-- [ ] Pastikan tidak ada URL `localhost` yang di-hardcode di frontend maupun backend.
-- [ ] Cek responsivitas tampilan di layar desktop dan mobile.
-- [ ] Lengkapi `README.md` (fitur, arsitektur, cara setup lokal Next.js + FastAPI, dan cara deploy).
-- [ ] Deploy ke Vercel, isi seluruh Environment Variables di Vercel Dashboard, dan lakukan uji _end-to-end_ pada URL production.
+- [x] Pastikan tidak ada URL `localhost` yang di-hardcode di frontend maupun backend.
+- [x] Cek responsivitas tampilan di layar desktop dan mobile.
+- [x] Lengkapi `README.md` (fitur, arsitektur, cara setup lokal Next.js + FastAPI, dan cara deploy).
+- [x] Deploy ke Vercel, isi seluruh Environment Variables di Vercel Dashboard, dan lakukan uji _end-to-end_ pada URL production.
 
 ### Kriteria Selesai (Acceptance Criteria)
 
