@@ -9,7 +9,7 @@
 
 Aplikasi web full-stack untuk mengekstrak data dari gambar dokumen **Kartu Keluarga (KK)** Indonesia secara otomatis menggunakan backend **Python (FastAPI)**, memverifikasi atau mengoreksi hasil pembacaan melalui halaman konfirmasi berbasis form yang dapat diedit (*editable form*), lalu menyimpannya ke database relasional **Supabase (PostgreSQL)**.
 
-Aplikasi ini dirancang agar dapat dideploy secara **gratis (zero extra cost)** di **Vercel** dalam satu repositori (*monorepo*) yang menggabungkan frontend **Next.js** dan backend **Python Serverless Functions**.
+Aplikasi disusun sebagai satu repositori (*monorepo*) yang menggabungkan frontend **Next.js** dan backend **Python FastAPI**. OCR dijalankan lokal oleh PaddleOCR tanpa aplikasi sistem atau API AI eksternal.
 
 ### Ruang Lingkup Utama
 1. **Input Image KK:** Unggah gambar KK untuk diproses dan diekstrak menjadi data terstruktur.
@@ -24,22 +24,22 @@ Aplikasi ini dirancang agar dapat dideploy secara **gratis (zero extra cost)** d
 | Lapisan | Teknologi | Alasan Pemilihan |
 | :--- | :--- | :--- |
 | **Frontend** | Next.js (App Router), TypeScript, Tailwind CSS, shadcn/ui | Native dengan Vercel, mendukung form dinamis (`react-hook-form` + `zod`) dan UI tabel yang modern. |
-| **Backend** | Python 3.12, FastAPI, Pydantic v2 | Ringan, validasi data ketat, dokumentasi otomatis (Swagger), dan didukung native oleh Vercel Serverless Functions. |
-| **Ekstraksi Dokumen** | Google Gemini 2.5 Flash (`google-genai`) via Structured Output | Bundle sangat ringan (< 10 MB, aman dari batas 250 MB Vercel), gratis (Free Tier AI Studio), dan sangat akurat membaca tabel 2 tingkat pada KK Indonesia. |
+| **Backend** | Python 3.12, FastAPI, Pydantic v2 | Validasi data ketat, dokumentasi otomatis (Swagger), dan menjalankan OCR lokal. |
+| **Ekstraksi Dokumen** | PaddleOCR + PaddlePaddle CPU + Pillow | OCR bahasa Indonesia berjalan lokal; posisi teks dipetakan ke dua tingkat tabel KK. |
 | **Database & Storage** | Supabase (PostgreSQL + Supabase Storage) | Gratis (Free Tier), menyediakan PostgreSQL relasional dan bucket penyimpanan gambar KK (`kk-images`). |
-| **Deployment** | Vercel (Monorepo: Next.js + Python Serverless) | Satu repo, satu deployment, tanpa masalah CORS, tanpa biaya tambahan. |
+| **Deployment** | Vercel + host/container Python | Vercel untuk frontend; backend menjalankan model PaddleOCR lokal. |
 
 ### Alur Data Sistem
 ```text
 [User Browser (Next.js)]
    │
-   ├─ 1. POST /api/py/extract (Multipart Image) ──► [FastAPI Serverless] ──► [Gemini Vision API]
+   ├─ 1. POST /api/py/extract (Multipart Image) ──► [FastAPI] ──► [PaddleOCR lokal]
    │                                                      │
    │  ◄── 2. JSON Terstruktur (Identitas + Anggota) ──────┘
    │
    ├─ 3. User Review & Edit di Halaman Konfirmasi (/confirm)
    │
-   └─ 4. POST /api/py/kk (JSON + Image) ──► [FastAPI Serverless] ──► [Supabase Storage & PostgreSQL]
+   └─ 4. POST /api/py/kk (JSON + Image) ──► [FastAPI] ──► [Supabase Storage & PostgreSQL]
 ```
 
 ---
@@ -128,12 +128,12 @@ CREATE TRIGGER trg_anggota_updated_at
 
 ## 4. Kontrak API Backend (FastAPI)
 
-Seluruh endpoint Python berada di bawah prefix `/api/py` agar Vercel dapat memisahkan routing backend Python dari Next.js.
+Seluruh endpoint Python berada di bawah prefix `/api/py` agar frontend dapat memakai kontrak URL yang sama pada development maupun production.
 
 ### 4.1 Ekstraksi Dokumen
 - **`POST /api/py/extract`**
   - **Input:** `multipart/form-data` dengan field `file` (JPG, PNG, WEBP, maks 5 MB).
-  - **Proses:** Validasi tipe & ukuran file -> kirim ke Gemini 2.5 Flash dengan Pydantic Structured Output -> kembalikan JSON hasil pembacaan (**belum** disimpan ke database).
+  - **Proses:** Validasi tipe & ukuran file -> preprocessing gambar dan PaddleOCR -> parser posisi teks -> kembalikan JSON hasil pembacaan (**belum** disimpan ke database).
   - **Response (`200 OK`):**
     ```json
     {
@@ -249,7 +249,7 @@ kk-scanner-app/
 │   ├── schemas/
 │   │   └── kk_schema.py          # Pydantic models (Extract, Identitas, Anggota)
 │   ├── services/
-│   │   ├── ocr_service.py        # Integrasi Gemini 2.5 Flash Structured Output
+│   │   ├── ocr_service.py        # Preprocessing, PaddleOCR, dan parser tabel KK
 │   │   └── supabase_service.py   # Operasi query & storage Supabase
 │   └── routers/
 │       ├── extract.py            # POST /api/py/extract
@@ -305,8 +305,8 @@ SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 SUPABASE_STORAGE_BUCKET=kk-images
 
-# Google Gemini API (AI Studio Free Tier)
-GEMINI_API_KEY=your-gemini-api-key
+# OCR lokal PaddleOCR
+OCR_LANGUAGE=id
 
 # Next.js (kosongkan di production agar menggunakan relative path /api/py)
 NEXT_PUBLIC_API_BASE_URL=
@@ -321,7 +321,7 @@ Kerjakan **satu fase per sesi** bersama Antigravity. Pastikan setiap fase berjal
 ### Phase 1: Project Scaffolding & Dokumentasi
 - **Tugas:**
   - Inisialisasi Next.js (TypeScript, Tailwind CSS, App Router) dan pasang `shadcn/ui` (`button`, `input`, `table`, `dialog`, `card`, `label`, `sonner`, `badge`).
-  - Buat struktur folder `api/`, `requirements.txt` (`fastapi`, `uvicorn`, `python-multipart`, `supabase`, `google-genai`, `pydantic`, `python-dotenv`), `vercel.json`, `.env.example`, dan konfigurasi rewrite dev di `next.config.ts` (forward `/api/py/*` ke `http://127.0.0.1:8000/api/py/*` saat lokal).
+  - Buat struktur folder `api/`, `requirements.txt` (FastAPI, Supabase, PaddleOCR/PaddlePaddle, Pillow, Pydantic, dan dotenv), `vercel.json`, `.env.example`, dan konfigurasi rewrite dev di `next.config.ts` (forward `/api/py/*` ke `http://127.0.0.1:8000/api/py/*` saat lokal).
   - Simpan dokumen ini di `docs/PRD.md`.
 - **Target Commits:**
   - `chore: initialize nextjs and fastapi monorepo structure for vercel`
@@ -339,7 +339,7 @@ Kerjakan **satu fase per sesi** bersama Antigravity. Pastikan setiap fase berjal
 ### Phase 3: Backend Python — Layanan Ekstraksi Gambar KK
 - **Tugas:**
   - Buat Pydantic schemas di `api/schemas/kk_schema.py` (validasi format tanggal `YYYY-MM-DD`, normalisasi karakter spasi/strip).
-  - Buat `api/services/ocr_service.py` menggunakan Gemini 2.5 Flash dengan `response_schema`.
+  - Buat `api/services/ocr_service.py` menggunakan PaddleOCR, preprocessing gambar, dan parser posisi tabel.
   - Buat `api/routers/extract.py` (`POST /api/py/extract`) dan uji via Swagger UI (`/api/py/docs`) menggunakan gambar KK dummy.
 - **Target Commits:**
   - `feat(api): define pydantic schemas for kk identity and family members`
@@ -371,10 +371,10 @@ Kerjakan **satu fase per sesi** bersama Antigravity. Pastikan setiap fase berjal
   - `feat(ui): implement kk directory table with search and quick actions`
   - `feat(ui): build kk detail page with full crud for family members`
 
-### Phase 7: Polish, Validasi & Deployment ke Vercel
+### Phase 7: Polish, Validasi & Deployment
 - **Tugas:**
   - Pastikan tidak ada hardcoded URL `localhost`, cek responsivitas mobile/desktop, dan lengkapi `README.md` (panduan setup lokal & arsitektur).
-  - Pasang seluruh environment variables di dashboard Vercel, deploy, dan lakukan uji *end-to-end* (Upload -> Konfirmasi -> Simpan -> Cari -> Detail -> Update -> Delete).
+  - Deploy frontend ke Vercel dan backend PaddleOCR ke host/container Python, atur environment variables, lalu lakukan uji *end-to-end*.
 - **Target Commits:**
   - `chore(deploy): finalize vercel config and environment setup`
   - `docs: complete readme with setup instructions and architecture overview`
@@ -385,6 +385,6 @@ Kerjakan **satu fase per sesi** bersama Antigravity. Pastikan setiap fase berjal
 
 1. **Kerjakan per fase:** Jangan pernah mengimplementasikan lebih dari satu fase dalam satu iterasi kecuali diminta secara eksplisit.
 2. **Patuhi nama tabel persis:** Selalu gunakan `"tbl_identitasKK"` dan `"tbl_anggotaKeluargaKK"` (perhatikan *case-sensitivity* pada PostgreSQL).
-3. **Jaga batas Vercel Serverless:** Jangan menambahkan library Python berat (seperti `torch`, `easyocr`, `opencv-python`, `paddleocr`) ke `requirements.txt`.
+3. **Runtime OCR:** Model PaddleOCR diunduh otomatis pada pemakaian pertama dan disimpan di cache lokal. Untuk production gunakan host/container dengan storage persisten karena ukuran dependensi/model tidak cocok untuk Vercel Python Function standar.
 4. **Keamanan & Privasi:** Jangan pernah meng-commit file `.env`, API key, atau foto Kartu Keluarga asli ke repositori Git. Gunakan data/gambar dummy untuk pengujian.
 5. **Sinkronisasi tipe data:** Pastikan setiap perubahan field pada `api/schemas/kk_schema.py` selalu disinkronkan dengan `src/types/kk.ts` dan `src/lib/validators.ts`.

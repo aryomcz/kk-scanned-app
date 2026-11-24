@@ -23,7 +23,7 @@
   - `api/schemas/__init__.py`
   - `api/services/__init__.py`
   - `api/routers/__init__.py`
-- [x] Buat `requirements.txt` berisi: `fastapi`, `uvicorn`, `python-multipart`, `supabase`, `google-genai`, `pydantic`, `python-dotenv`.
+- [x] Buat `requirements.txt` berisi dependensi FastAPI, Supabase, PaddleOCR/PaddlePaddle CPU, Pillow, Pydantic, dan dotenv.
 - [x] Buat `vercel.json` untuk rewrite `/api/py/:path*` ke `/api/index.py`.
 - [x] Update `next.config.ts` dengan `rewrites()` untuk meneruskan `/api/py/:path*` ke `http://127.0.0.1:8000/api/py/:path*` saat `NODE_ENV === "development"`.
 - [x] Buat `.env.example` sesuai spesifikasi di `docs/PRD.md`.
@@ -46,7 +46,7 @@
 ### Checklist Tugas
 
 - [x] Buat file `supabase/migrations/001_init_kk_tables.sql` persis sesuai skema SQL di `docs/PRD.md` (`tbl_identitasKK`, `tbl_anggotaKeluargaKK`, index, dan trigger `updated_at`).
-- [x] Buat `api/core/config.py` untuk membaca `.env` (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET`, `GEMINI_API_KEY`) dan menginisialisasi singleton Supabase Client.
+- [x] Buat `api/core/config.py` untuk membaca `.env` (`SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_STORAGE_BUCKET`, `OCR_LANGUAGE`) dan menginisialisasi singleton Supabase Client.
 - [x] Perbarui `GET /api/py/health` agar memverifikasi koneksi ke Supabase (misalnya query ringan ke `tbl_identitasKK`).
 
 ### Kriteria Selesai (Acceptance Criteria)
@@ -56,7 +56,7 @@
 
 ---
 
-## Phase 3: Backend Python — Layanan Ekstraksi Gambar KK (Gemini)
+## Phase 3: Backend Python — Layanan Ekstraksi Gambar KK (OCR Lokal)
 
 **Target Commit:**
 
@@ -71,7 +71,7 @@
   - `KKExtractionResponse` (berisi `identitas` dan `anggota: list[...]`)
   - Normalisasi field tanggal (`YYYY-MM-DD` atau `None` jika kosong/`-`).
 - [x] Buat `api/services/ocr_service.py`:
-  - Gunakan `google-genai` (`gemini-3.8-flash`) dengan `response_mime_type="application/json"` dan `response_schema=KKExtractionResponse`.
+  - Gunakan PaddleOCR lokal, preprocessing Pillow, dan posisi teks untuk menghasilkan `KKExtractionResponse`.
   - Pastikan prompt sistem menginstruksikan pembacaan akurat untuk seluruh kolom KK Indonesia (termasuk menangani nilai `-` atau kosong).
 - [x] Buat `api/routers/extract.py` dengan endpoint `POST /api/py/extract`:
   - Validasi tipe file (JPG, PNG, WEBP) dan ukuran maksimal 5 MB.
@@ -166,7 +166,7 @@
 
 ---
 
-## Phase 7: Polish, Validasi & Deployment ke Vercel
+## Phase 7: Polish, Validasi & Deployment
 
 **Target Commit:**
 
@@ -178,8 +178,8 @@
 - [x] Pastikan tidak ada URL `localhost` yang di-hardcode di frontend maupun backend.
 - [x] Cek responsivitas tampilan di layar desktop dan mobile.
 - [x] Lengkapi `README.md` (fitur, arsitektur, cara setup lokal Next.js + FastAPI, dan cara deploy).
-- [x] Deploy ke Vercel, isi seluruh Environment Variables di Vercel Dashboard, dan lakukan uji _end-to-end_ pada URL production.
+- [ ] Deploy frontend ke Vercel dan backend PaddleOCR ke host/container Python, lalu lakukan uji _end-to-end_ pada URL production.
 
 ### Kriteria Selesai (Acceptance Criteria)
 
-1. Aplikasi live di Vercel tanpa biaya tambahan dan seluruh alur (Upload -> Konfirmasi -> Simpan -> Cari -> Detail -> Update -> Delete) berjalan normal di production.
+1. Frontend dan backend OCR live, serta seluruh alur (Upload -> Konfirmasi -> Simpan -> Cari -> Detail -> Update -> Delete) berjalan normal di production.

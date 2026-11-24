@@ -1,8 +1,7 @@
 import asyncio
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from google.genai import errors as genai_errors
 from api.schemas.kk_schema import KKExtractionResponse
-from api.services.ocr_service import extract_kk_data
+from api.services.ocr_service import OCRUnavailableError, extract_kk_data
 
 router = APIRouter(prefix="/api/py", tags=["Extract"])
 
@@ -31,9 +30,9 @@ async def extract_kk(file: UploadFile = File(...)):
     mime_type = "image/jpeg" if content_type == "image/jpg" else content_type
     try:
         return await asyncio.to_thread(extract_kk_data, image_bytes, mime_type)
-    except genai_errors.APIError as e:
-        code = getattr(e, "code", None)
-        status = code if code in (429, 503) else 502
-        raise HTTPException(status_code=status, detail=f"Gagal mengekstrak gambar KK: {e}")
+    except OCRUnavailableError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal mengekstrak gambar KK: {e}")

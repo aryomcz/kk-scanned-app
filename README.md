@@ -1,8 +1,8 @@
 # Arsip KK — Digitalisasi & Manajemen Kartu Keluarga
 
-Aplikasi web full-stack untuk mengekstrak data dokumen **Kartu Keluarga (KK)** Indonesia secara otomatis menggunakan backend **Python (FastAPI)** dan **Gemini Structured Output**, memverifikasi hasil pembacaan berdampingan dengan dokumen asli, lalu menyimpannya ke database relasional dan object storage **Supabase**.
+Aplikasi web full-stack untuk mengekstrak data dokumen **Kartu Keluarga (KK)** Indonesia secara otomatis menggunakan backend **Python (FastAPI)** dan **PaddleOCR**, memverifikasi hasil pembacaan berdampingan dengan dokumen asli, lalu menyimpannya ke database relasional dan object storage **Supabase**.
 
-Proyek ini disusun sebagai **monorepo Next.js + FastAPI** agar dapat dideploy langsung di **Vercel** tanpa server terpisah dan tanpa masalah CORS.
+Proyek ini disusun sebagai **monorepo Next.js + FastAPI**. OCR berjalan lokal melalui dependensi Python dan tidak memerlukan aplikasi OCR sistem atau API AI eksternal.
 
 ---
 
@@ -20,16 +20,16 @@ Proyek ini disusun sebagai **monorepo Next.js + FastAPI** agar dapat dideploy la
 | Lapisan | Teknologi | Peran |
 | :--- | :--- | :--- |
 | **Frontend** | Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS v4, shadcn/ui, `react-hook-form`, `zod`, `sonner` | Antarmuka pengguna, validasi form, dan HTTP client ke `/api/py/*` |
-| **Backend API** | Python, FastAPI, Pydantic v2 | Endpoint REST `/api/py/*` (ekstraksi OCR + CRUD KK & Anggota) yang berjalan sebagai Vercel Serverless Function |
-| **Ekstraksi Dokumen** | `google-genai` (`gemini-3.5-flash`) | Pembacaan gambar KK menggunakan JSON Structured Output sesuai schema `KKExtractionResponse` |
+| **Backend API** | Python, FastAPI, Pydantic v2 | Endpoint REST `/api/py/*` untuk ekstraksi OCR dan CRUD KK/anggota |
+| **Ekstraksi Dokumen** | PaddleOCR, PaddlePaddle CPU, Pillow | Preprocessing gambar, OCR bahasa Indonesia, dan pemetaan posisi teks ke schema `KKExtractionResponse` tanpa API AI eksternal |
 | **Database & Storage** | Supabase (PostgreSQL + Supabase Storage bucket `kk-images`) | Penyimpanan relasional `"tbl_identitasKK"` & `"tbl_anggotaKeluargaKK"` (`ON DELETE CASCADE`) serta arsip gambar KK |
-| **Deployment** | Vercel (`vercel.json` rewrites) | Mengarahkan `/api/py/:path*` ke `api/index.py` dan rute lainnya ke Next.js |
+| **Deployment** | Vercel + host/container Python | Vercel untuk Next.js; backend menjalankan model PaddleOCR lokal |
 
 ### Alur Data
 
 ```text
 Browser (Next.js)
-  ├── POST /api/py/extract   ──► FastAPI ──► Gemini Vision API (Structured JSON)
+  ├── POST /api/py/extract   ──► FastAPI ──► PaddleOCR lokal
   ├── Review di /confirm
   ├── POST /api/py/kk        ──► FastAPI ──► Supabase Storage (kk-images) + PostgreSQL
   └── CRUD /kk & /kk/[id]    ──► FastAPI ──► tbl_identitasKK & tbl_anggotaKeluargaKK
@@ -46,7 +46,7 @@ kk-scanner-app/
 │   ├── core/config.py            # Loader env & singleton Supabase client
 │   ├── schemas/kk_schema.py      # Pydantic schemas & normalisasi tanggal
 │   ├── services/
-│   │   ├── ocr_service.py        # Integrasi google-genai Structured Output
+│   │   ├── ocr_service.py        # Preprocessing, PaddleOCR, dan parser tabel KK
 │   │   └── supabase_service.py   # Query Supabase PostgreSQL & Storage
 │   └── routers/
 │       ├── extract.py            # POST /api/py/extract
@@ -74,7 +74,7 @@ kk-scanner-app/
 │   └── 001_init_kk_tables.sql    # DDL tabel, index, dan trigger updated_at
 ├── next.config.ts                # Rewrite dev /api/py/* -> 127.0.0.1:8000
 ├── vercel.json                   # Rewrite production /api/py/* -> /api/index.py
-├── requirements.txt              # Dependensi Python ringan (< batas Vercel)
+├── requirements.txt              # Dependensi backend Python dan OCR
 └── .env.example
 ```
 
@@ -98,7 +98,7 @@ cp .env.example .env
 SUPABASE_URL=https://your-project-id.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=your-supabase-service-role-key
 SUPABASE_STORAGE_BUCKET=kk-images
-GEMINI_API_KEY=your-gemini-api-key
+OCR_LANGUAGE=id
 NEXT_PUBLIC_API_BASE_URL=
 ```
 
@@ -113,6 +113,7 @@ python -m venv .venv
 pip install -r requirements.txt
 uvicorn api.index:app --reload --port 8000
 ```
+- Pemrosesan pertama akan mengunduh model PaddleOCR bahasa Indonesia ke cache pengguna. Proses berikutnya dapat berjalan dari model lokal tersebut.
 - Swagger UI tersedia di `http://127.0.0.1:8000/api/py/docs`.
 - Healthcheck tersedia di `http://127.0.0.1:8000/api/py/health`.
 
@@ -127,18 +128,14 @@ Buka `http://localhost:3000` di browser. Saat `NODE_ENV === "development"`, `nex
 
 ---
 
-## Deployment ke Vercel
+## Deployment
 
 1. Push repositori ke GitHub (pastikan file `.env` tidak ikut ter-commit).
-2. Import repositori di **Vercel Dashboard** dengan preset **Next.js**.
-3. Tambahkan **Environment Variables** berikut pada Vercel Project Settings:
+2. Jalankan backend pada mesin/container Python, pasang `requirements.txt`, lalu isi environment Supabase dan OCR pada host tersebut.
+3. Import frontend di **Vercel Dashboard** dengan preset **Next.js**, lalu tambahkan:
 
 | Variable | Wajib | Keterangan |
 | :--- | :--- | :--- |
-| `SUPABASE_URL` | Ya | URL project Supabase Anda |
-| `SUPABASE_SERVICE_ROLE_KEY` | Ya | Service Role Key Supabase untuk akses tabel & bucket Storage |
-| `SUPABASE_STORAGE_BUCKET` | Opsional | Default: `kk-images` |
-| `GEMINI_API_KEY` | Ya | API Key dari Google AI Studio |
-| `NEXT_PUBLIC_API_BASE_URL` | Kosongkan | Biarkan kosong di production agar frontend memanggil relative path `/api/py/*` |
+| `NEXT_PUBLIC_API_BASE_URL` | Ya | URL publik backend FastAPI tanpa garis miring di akhir |
 
-4. Deploy. `vercel.json` akan otomatis mengarahkan seluruh rute `/api/py/*` ke Python Serverless Function `api/index.py`.
+4. Deploy frontend. PaddleOCR dan modelnya cukup besar, sehingga backend OCR sebaiknya memakai host/container terpisah dan bukan Vercel Python Function standar.

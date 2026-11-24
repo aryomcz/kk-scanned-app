@@ -8,7 +8,7 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 SUPABASE_URL = os.getenv("SUPABASE_URL", "")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 SUPABASE_STORAGE_BUCKET = os.getenv("SUPABASE_STORAGE_BUCKET", "kk-images")
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+OCR_LANGUAGE = os.getenv("OCR_LANGUAGE", "id")
 
 _supabase_client: Client | None = None
 

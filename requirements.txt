@@ -2,6 +2,9 @@ fastapi
 uvicorn
 python-multipart
 supabase
-google-genai
+paddlepaddle==3.2.0
+paddleocr==3.7.0
+numpy==2.3.5
+Pillow
 pydantic
 python-dotenv

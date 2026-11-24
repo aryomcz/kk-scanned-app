@@ -163,6 +163,7 @@ const AnggotaCard = memo(function AnggotaCard({
 const emptySubscribe = () => () => {};
 
 export default function ConfirmPage() {
+  const { bfcacheId } = useRouter();
   const rawDraft = useSyncExternalStore(
     emptySubscribe,
     () => sessionStorage.getItem(KK_DRAFT_STORAGE_KEY),
@@ -215,7 +216,7 @@ export default function ConfirmPage() {
     );
   }
 
-  return <ConfirmWorkspace draft={draft} />;
+  return <ConfirmWorkspace key={bfcacheId} draft={draft} />;
 }
 
 function ConfirmNoKKBadge({ control }: { control: Control<KKFormValues> }) {
