@@ -1,4 +1,7 @@
 import type {
+  AnggotaBase,
+  AnggotaResponse,
+  IdentitasKKBase,
   IdentitasKKResponse,
   KKCreateRequest,
   KKExtractionResponse,
@@ -60,4 +63,70 @@ export function createKK(
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
+}
+
+export function listKK(search?: string): Promise<IdentitasKKResponse[]> {
+  const q = search?.trim();
+  const suffix = q ? `?search=${encodeURIComponent(q)}` : "";
+  return request<IdentitasKKResponse[]>(`/api/py/kk${suffix}`);
+}
+
+export function getKK(id: string): Promise<IdentitasKKResponse> {
+  return request<IdentitasKKResponse>(`/api/py/kk/${encodeURIComponent(id)}`);
+}
+
+export function updateKK(
+  id: string,
+  payload: IdentitasKKBase
+): Promise<IdentitasKKResponse> {
+  return request<IdentitasKKResponse>(`/api/py/kk/${encodeURIComponent(id)}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+}
+
+export function deleteKK(id: string): Promise<{ message: string }> {
+  return request<{ message: string }>(`/api/py/kk/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
+}
+
+export function createAnggota(
+  kkId: string,
+  payload: AnggotaBase
+): Promise<AnggotaResponse> {
+  return request<AnggotaResponse>(
+    `/api/py/kk/${encodeURIComponent(kkId)}/anggota`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export function updateAnggota(
+  anggotaId: string,
+  payload: AnggotaBase
+): Promise<AnggotaResponse> {
+  return request<AnggotaResponse>(
+    `/api/py/anggota/${encodeURIComponent(anggotaId)}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    }
+  );
+}
+
+export function deleteAnggota(
+  anggotaId: string
+): Promise<{ message: string }> {
+  return request<{ message: string }>(
+    `/api/py/anggota/${encodeURIComponent(anggotaId)}`,
+    {
+      method: "DELETE",
+    }
+  );
 }

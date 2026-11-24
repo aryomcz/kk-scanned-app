@@ -168,3 +168,82 @@ export function toAnggotaPayload(values: AnggotaFormValues): AnggotaBase {
     nama_ibu: toNullable(values.nama_ibu),
   };
 }
+
+export interface FieldSpec<K extends string> {
+  name: K;
+  label: string;
+  required?: boolean;
+  placeholder?: string;
+  mono?: boolean;
+  colSpan?: string;
+  maxLength?: number;
+}
+
+export const IDENTITAS_FIELDS: FieldSpec<keyof IdentitasFormValues>[] = [
+  {
+    name: "no_kk",
+    label: "No. KK (16 Digit)",
+    required: true,
+    mono: true,
+    maxLength: 16,
+    placeholder: "3276010101010001",
+  },
+  {
+    name: "nama_kepala_keluarga",
+    label: "Nama Kepala Keluarga",
+    required: true,
+    placeholder: "BUDI SANTOSO",
+  },
+  {
+    name: "alamat",
+    label: "Alamat",
+    colSpan: "sm:col-span-2",
+    placeholder: "JL. MARGONDA RAYA NO. 10",
+  },
+  { name: "rt_rw", label: "RT / RW", mono: true, placeholder: "001/002" },
+  { name: "kode_pos", label: "Kode Pos", mono: true, placeholder: "16424" },
+  { name: "desa_kelurahan", label: "Desa / Kelurahan" },
+  { name: "kecamatan", label: "Kecamatan" },
+  { name: "kabupaten_kota", label: "Kabupaten / Kota" },
+  { name: "provinsi", label: "Provinsi" },
+];
+
+export const ANGGOTA_FIELDS: FieldSpec<keyof AnggotaFormValues>[] = [
+  {
+    name: "nik",
+    label: "NIK (16 Digit)",
+    required: true,
+    mono: true,
+    maxLength: 16,
+  },
+  { name: "nama_lengkap", label: "Nama Lengkap", required: true },
+  {
+    name: "jenis_kelamin",
+    label: "Jenis Kelamin",
+    placeholder: "LAKI-LAKI / PEREMPUAN",
+  },
+  { name: "tempat_lahir", label: "Tempat Lahir" },
+  {
+    name: "tanggal_lahir",
+    label: "Tanggal Lahir",
+    mono: true,
+    placeholder: "YYYY-MM-DD",
+  },
+  { name: "agama", label: "Agama" },
+  { name: "pendidikan", label: "Pendidikan" },
+  { name: "jenis_pekerjaan", label: "Jenis Pekerjaan" },
+  { name: "golongan_darah", label: "Golongan Darah" },
+  { name: "status_perkawinan", label: "Status Perkawinan" },
+  {
+    name: "tanggal_perkawinan",
+    label: "Tanggal Perkawinan",
+    mono: true,
+    placeholder: "YYYY-MM-DD",
+  },
+  { name: "status_hubungan_keluarga", label: "Status Hubungan Keluarga" },
+  { name: "kewarganegaraan", label: "Kewarganegaraan", placeholder: "WNI" },
+  { name: "no_paspor", label: "No. Paspor", mono: true },
+  { name: "no_kitap", label: "No. KITAP", mono: true },
+  { name: "nama_ayah", label: "Nama Ayah" },
+  { name: "nama_ibu", label: "Nama Ibu" },
+];
