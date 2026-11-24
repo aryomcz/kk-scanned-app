@@ -5,7 +5,9 @@ import Link from "next/link";
 import {
   AlertTriangle,
   FileText,
+  FolderCheck,
   Loader2,
+  MapPin,
   Pencil,
   Plus,
   RefreshCw,
@@ -144,28 +146,84 @@ export default function KKDirectoryPage() {
     }
   };
 
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Daftar Kartu Keluarga
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Penelusuran arsip identitas Kartu Keluarga (
-            <code className="font-mono text-xs">tbl_identitasKK</code>). Klik
-            &ldquo;Lihat Anggota&rdquo; untuk mengelola anggota keluarga.
-          </p>
-        </div>
+  const totalAnggota = items.reduce(
+    (sum, row) => sum + (row.jumlah_anggota ?? 0),
+    0
+  );
+  const totalWilayah = new Set(
+    items
+      .map((row) => row.kabupaten_kota?.trim())
+      .filter((val): val is string => Boolean(val))
+  ).size;
 
-        <Link
-          href="/upload"
-          className={cn(buttonVariants({ variant: "default" }))}
-        >
-          <Plus className="size-4" />
-          <span>Upload KK Baru</span>
-        </Link>
-      </div>
+  return (
+    <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <Card className="justify-between border-t-2 border-t-primary lg:col-span-6">
+          <CardHeader>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Badge variant="secondary">Arsip Utama · tbl_identitasKK</Badge>
+            </div>
+            <CardTitle className="mt-1 text-2xl font-semibold tracking-tight">
+              Daftar Kartu Keluarga
+            </CardTitle>
+            <CardDescription>
+              Telusuri identitas Kartu Keluarga yang tersimpan, perbarui data
+              kepala keluarga dan alamat, atau buka rincian anggota keluarga.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-2.5 pt-0">
+            <Link
+              href="/upload"
+              className={cn(buttonVariants({ variant: "default" }))}
+            >
+              <Plus className="size-4" />
+              <span>Upload &amp; Scan KK Baru</span>
+            </Link>
+          </CardContent>
+        </Card>
+
+        <Card className="justify-between sm:col-span-6 lg:col-span-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardDescription className="font-medium text-foreground">
+              Dokumen KK
+            </CardDescription>
+            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-primary">
+              <FolderCheck className="size-4" />
+            </span>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">
+              {items.length}
+            </div>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {debouncedSearch
+                ? `Hasil pencarian "${debouncedSearch}"`
+                : "Total kartu keluarga aktif"}
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="justify-between sm:col-span-6 lg:col-span-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardDescription className="font-medium text-foreground">
+              Anggota Tercatat
+            </CardDescription>
+            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-primary">
+              <Users className="size-4" />
+            </span>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">
+              {totalAnggota}
+            </div>
+            <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
+              <MapPin className="size-3 shrink-0" />
+              <span>{totalWilayah} kabupaten/kota tercakup</span>
+            </p>
+          </CardContent>
+        </Card>
+      </section>
 
       <Card>
         <CardHeader className="border-b border-border">

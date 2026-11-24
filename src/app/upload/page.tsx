@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   AlertCircle,
+  CheckCircle2,
   FileImage,
   Loader2,
   Sparkles,
@@ -165,24 +166,54 @@ export default function UploadPage() {
   };
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-3 border-b border-border pb-4">
-        <div>
-          <h1 className="text-xl font-semibold tracking-tight text-foreground">
-            Scan &amp; Upload Kartu Keluarga
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Unggah foto atau scan KK untuk diekstrak otomatis ke formulir
-            verifikasi.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">JPG / PNG / WEBP</Badge>
-          <Badge variant="outline" className="tabular-nums">
-            Maks. 5 MB
-          </Badge>
-        </div>
-      </div>
+    <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <Card className="border-t-2 border-t-primary lg:col-span-6">
+          <CardHeader>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant="secondary">JPG / PNG / WEBP</Badge>
+              <Badge variant="outline" className="tabular-nums">
+                Maks. 5 MB
+              </Badge>
+            </div>
+            <CardTitle className="mt-1 text-2xl font-semibold tracking-tight">
+              Scan &amp; Upload Kartu Keluarga
+            </CardTitle>
+            <CardDescription>
+              Unggah foto atau scan KK untuk mengekstrak identitas keluarga dan
+              tabel anggota secara otomatis ke formulir verifikasi.
+            </CardDescription>
+          </CardHeader>
+        </Card>
+
+        <Card className="sm:col-span-6 lg:col-span-3">
+          <CardHeader className="pb-2">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-primary">
+              <Sparkles className="size-4" />
+            </span>
+            <CardTitle className="mt-2 text-sm">1. Ekstraksi Terstruktur</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">
+              Membaca 9 kolom identitas header dan 17 kolom anggota KK dua tingkat.
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="sm:col-span-6 lg:col-span-3">
+          <CardHeader className="pb-2">
+            <span className="flex size-8 items-center justify-center rounded-lg bg-secondary text-primary">
+              <CheckCircle2 className="size-4" />
+            </span>
+            <CardTitle className="mt-2 text-sm">2. Koreksi Sebelum Simpan</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-xs text-muted-foreground">
+              Tinjau dokumen asli berdampingan sebelum menyimpan ke database.
+            </p>
+          </CardContent>
+        </Card>
+      </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
         <Card className="lg:col-span-5">

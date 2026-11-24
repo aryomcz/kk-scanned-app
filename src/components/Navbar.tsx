@@ -25,10 +25,10 @@ function NavLinks({ pathname }: { pathname?: string }) {
             key={href}
             href={href}
             className={cn(
-              "inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-xs font-medium transition-colors sm:text-sm",
+              "inline-flex h-8 items-center gap-1.5 rounded-lg px-3 text-xs font-medium transition-colors sm:text-sm",
               active
-                ? "bg-secondary text-foreground"
-                : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                ? "bg-primary text-primary-foreground shadow-xs"
+                : "text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
             )}
           >
             <Icon className="size-3.5" />
@@ -47,13 +47,13 @@ function ActiveNavLinks() {
 
 export function Navbar() {
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
+    <header className="sticky top-0 z-40 border-b border-border/80 bg-card/90 backdrop-blur-md">
+      <div className="mx-auto flex h-15 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
         <Link
           href="/kk"
           className="flex items-center gap-2.5 text-sm font-semibold tracking-tight text-foreground"
         >
-          <span className="flex size-7 items-center justify-center rounded-md bg-primary text-primary-foreground">
+          <span className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground shadow-xs">
             <FileScan className="size-4" />
           </span>
           <span>Arsip KK</span>

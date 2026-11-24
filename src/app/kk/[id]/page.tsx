@@ -6,8 +6,10 @@ import { useParams, useRouter } from "next/navigation";
 import {
   AlertTriangle,
   ArrowLeft,
+  Home,
   Image as ImageIcon,
   Loader2,
+  MapPin,
   Pencil,
   Plus,
   RotateCcw,
@@ -227,12 +229,13 @@ function KKDetailWorkspace() {
 
   const anggotaList = kk.anggota ?? [];
 
-  const identityItems = [
-    { label: "No. KK", value: kk.no_kk, mono: true },
-    { label: "Nama Kepala Keluarga", value: kk.nama_kepala_keluarga },
+  const addressItems = [
     { label: "Alamat", value: val(kk.alamat), span: "sm:col-span-2" },
     { label: "RT / RW", value: val(kk.rt_rw), mono: true },
     { label: "Kode Pos", value: val(kk.kode_pos), mono: true },
+  ];
+
+  const regionItems = [
     { label: "Desa / Kelurahan", value: val(kk.desa_kelurahan) },
     { label: "Kecamatan", value: val(kk.kecamatan) },
     { label: "Kabupaten / Kota", value: val(kk.kabupaten_kota) },
@@ -240,94 +243,174 @@ function KKDetailWorkspace() {
   ];
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-        <div className="space-y-1">
-          <Link
-            href="/kk"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-3.5" />
-            <span>Kembali ke Daftar KK</span>
-          </Link>
-          <div className="flex flex-wrap items-center gap-2.5">
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+    <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <Card className="justify-between border-t-2 border-t-primary lg:col-span-8">
+          <CardHeader>
+            <div>
+              <Link
+                href="/kk"
+                className="inline-flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                <ArrowLeft className="size-3.5" />
+                <span>Kembali ke Daftar KK</span>
+              </Link>
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <Badge variant="secondary" className="font-mono tabular-nums">
+                No. KK {kk.no_kk}
+              </Badge>
+              <Badge variant="outline" className="tabular-nums">
+                {anggotaList.length} Anggota
+              </Badge>
+            </div>
+            <CardTitle className="mt-1 text-2xl font-semibold tracking-tight">
               {kk.nama_kepala_keluarga}
-            </h1>
-            <Badge variant="outline" className="font-mono tabular-nums">
-              {kk.no_kk}
-            </Badge>
-            <Badge variant="secondary" className="tabular-nums">
-              {anggotaList.length} Anggota
-            </Badge>
-          </div>
-        </div>
+            </CardTitle>
+            <CardDescription>
+              Detail arsip Kartu Keluarga (<code className="font-mono text-xs">tbl_identitasKK</code>) beserta manajemen anggota keluarga.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap items-center gap-2 pt-0">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setEditIdentitasOpen(true)}
+            >
+              <Pencil className="size-3.5" />
+              <span>Edit Identitas KK</span>
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={() => setDeleteKKOpen(true)}
+            >
+              <Trash2 className="size-3.5" />
+              <span>Hapus KK</span>
+            </Button>
+          </CardContent>
+        </Card>
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={openPreview}
-            disabled={!kk.image_url}
-            title={
-              kk.image_url
-                ? "Lihat gambar dokumen KK"
-                : "Gambar KK tidak tersedia"
-            }
-          >
-            <ImageIcon className="size-3.5" />
-            <span>Lihat Gambar KK</span>
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setEditIdentitasOpen(true)}
-          >
-            <Pencil className="size-3.5" />
-            <span>Edit Identitas KK</span>
-          </Button>
-          <Button
-            type="button"
-            variant="destructive"
-            size="sm"
-            onClick={() => setDeleteKKOpen(true)}
-          >
-            <Trash2 className="size-3.5" />
-            <span>Hapus KK</span>
-          </Button>
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader className="border-b border-border">
-          <CardTitle>Identitas Kartu Keluarga</CardTitle>
-          <CardDescription>
-            Rincian lengkap data header pada{" "}
-            <code className="font-mono text-xs">tbl_identitasKK</code>.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
-            {identityItems.map((item) => (
-              <div key={item.label} className={cn("space-y-0.5", item.span)}>
-                <dt className="text-xs font-medium text-muted-foreground">
-                  {item.label}
-                </dt>
-                <dd
-                  className={cn(
-                    "text-sm font-medium text-foreground",
-                    item.mono && "font-mono tabular-nums"
-                  )}
-                >
-                  {item.value}
-                </dd>
+        <Card className="justify-between lg:col-span-4">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <ImageIcon className="size-4 text-primary" />
+              <span>Arsip Scan Dokumen KK</span>
+            </CardTitle>
+            <CardDescription className="text-xs">
+              Buka pratinjau ukuran penuh dengan kontrol zoom.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {kk.image_url ? (
+              <div className="overflow-hidden rounded-lg border border-border bg-muted/40">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={kk.image_url}
+                  alt={`Thumbnail Kartu Keluarga ${kk.no_kk}`}
+                  className="h-24 w-full object-cover"
+                />
               </div>
-            ))}
-          </dl>
-        </CardContent>
-      </Card>
+            ) : (
+              <div className="flex h-24 items-center justify-center rounded-lg border border-dashed border-border bg-muted/30 text-xs text-muted-foreground">
+                Gambar dokumen tidak tersedia
+              </div>
+            )}
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={openPreview}
+              disabled={!kk.image_url}
+            >
+              <ImageIcon className="size-3.5" />
+              <span>Lihat Gambar KK</span>
+            </Button>
+          </CardContent>
+        </Card>
+
+        <Card className="sm:col-span-6 lg:col-span-4">
+          <CardHeader className="border-b border-border pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <Home className="size-4 text-primary" />
+              <span>Alamat Domisili</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {addressItems.map((item) => (
+                <div key={item.label} className={cn("space-y-0.5", item.span)}>
+                  <dt className="text-xs font-medium text-muted-foreground">
+                    {item.label}
+                  </dt>
+                  <dd
+                    className={cn(
+                      "text-sm font-medium text-foreground",
+                      item.mono && "font-mono tabular-nums"
+                    )}
+                  >
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card className="sm:col-span-6 lg:col-span-5">
+          <CardHeader className="border-b border-border pb-3">
+            <CardTitle className="flex items-center gap-2 text-sm">
+              <MapPin className="size-4 text-primary" />
+              <span>Wilayah Administratif</span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {regionItems.map((item) => (
+                <div key={item.label} className="space-y-0.5">
+                  <dt className="text-xs font-medium text-muted-foreground">
+                    {item.label}
+                  </dt>
+                  <dd className="text-sm font-medium text-foreground">
+                    {item.value}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </CardContent>
+        </Card>
+
+        <Card className="justify-between lg:col-span-3">
+          <CardHeader className="pb-2">
+            <CardDescription className="flex items-center gap-2 font-medium text-foreground">
+              <Users className="size-4 text-primary" />
+              <span>Anggota Keluarga</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <div>
+              <div className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">
+                {anggotaList.length}
+              </div>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Anggota terdaftar pada KK ini
+              </p>
+            </div>
+            <Button
+              type="button"
+              size="sm"
+              className="w-full"
+              onClick={openAddAnggota}
+            >
+              <Plus className="size-3.5" />
+              <span>Tambah Anggota</span>
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
 
       <Card>
         <CardHeader className="border-b border-border">

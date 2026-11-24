@@ -218,6 +218,32 @@ export default function ConfirmPage() {
   return <ConfirmWorkspace draft={draft} />;
 }
 
+function ConfirmNoKKBadge({ control }: { control: Control<KKFormValues> }) {
+  const noKK = useWatch({ control, name: "identitas.no_kk" });
+  const kepala = useWatch({
+    control,
+    name: "identitas.nama_kepala_keluarga",
+  });
+
+  return (
+    <Card className="justify-between sm:col-span-6 lg:col-span-3">
+      <CardHeader className="pb-1">
+        <CardDescription className="text-xs font-medium text-foreground">
+          Identitas Terbaca
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="truncate font-mono text-base font-semibold text-foreground tabular-nums">
+          {noKK || "Belum terisi"}
+        </div>
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          {kepala || "Nama kepala keluarga"}
+        </p>
+      </CardContent>
+    </Card>
+  );
+}
+
 function ConfirmWorkspace({ draft }: { draft: KKDraftSession }) {
   const router = useRouter();
   const [zoom, setZoom] = useState<number>(100);
@@ -269,28 +295,47 @@ function ConfirmWorkspace({ draft }: { draft: KKDraftSession }) {
     errors.anggota?.message || errors.anggota?.root?.message;
 
   return (
-    <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
-      <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-border pb-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-semibold tracking-tight text-foreground">
+    <div className="mx-auto max-w-7xl space-y-5 px-4 py-6 sm:px-6">
+      <section className="grid grid-cols-1 gap-4 lg:grid-cols-12">
+        <Card className="border-t-2 border-t-primary lg:col-span-7">
+          <CardHeader>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <Badge variant="secondary">Draft Belum Tersimpan</Badge>
+              <Link
+                href="/upload"
+                className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
+              >
+                Upload Ulang
+              </Link>
+            </div>
+            <CardTitle className="mt-1 text-2xl font-semibold tracking-tight">
               Konfirmasi &amp; Koreksi Data KK
-            </h1>
-            <Badge variant="secondary">Draft Belum Tersimpan</Badge>
-          </div>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Cocokkan hasil pembacaan dengan dokumen asli di sebelah kiri sebelum
-            disimpan ke database.
-          </p>
-        </div>
+            </CardTitle>
+            <CardDescription>
+              Cocokkan hasil pembacaan dengan dokumen asli di sebelah kiri
+              sebelum disimpan ke database.
+            </CardDescription>
+          </CardHeader>
+        </Card>
 
-        <Link
-          href="/upload"
-          className={cn(buttonVariants({ variant: "outline", size: "sm" }))}
-        >
-          Upload Ulang
-        </Link>
-      </div>
+        <ConfirmNoKKBadge control={control} />
+
+        <Card className="justify-between sm:col-span-6 lg:col-span-2">
+          <CardHeader className="pb-1">
+            <CardDescription className="text-xs font-medium text-foreground">
+              Total Anggota
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-semibold tracking-tight text-foreground tabular-nums">
+              {fields.length}
+            </div>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Baris siap disimpan
+            </p>
+          </CardContent>
+        </Card>
+      </section>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start">
         <Card className="lg:sticky lg:top-20 lg:col-span-5">
