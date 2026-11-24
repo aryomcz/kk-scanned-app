@@ -119,15 +119,15 @@
 
 ### Checklist Tugas
 
-- [ ] Buat `src/types/kk.ts` (sinkron 1:1 dengan Pydantic schemas).
-- [ ] Buat `src/lib/validators.ts` (skema Zod untuk form identitas & anggota).
-- [ ] Buat `src/lib/api.ts` (fetch wrapper ke `/api/py/*` dengan error handling pesan backend).
-- [ ] Buat `src/components/Navbar.tsx` dan pasang di `src/app/layout.tsx` bersama `Toaster` (`sonner`).
-- [ ] Buat `src/app/page.tsx` yang me-redirect ke `/kk`.
-- [ ] Buat `src/app/upload/page.tsx`:
+- [x] Buat `src/types/kk.ts` (sinkron 1:1 dengan Pydantic schemas).
+- [x] Buat `src/lib/validators.ts` (skema Zod untuk form identitas & anggota).
+- [x] Buat `src/lib/api.ts` (fetch wrapper ke `/api/py/*` dengan error handling pesan backend).
+- [x] Buat `src/components/Navbar.tsx` dan pasang di `src/app/layout.tsx` bersama `Toaster` (`sonner`).
+- [x] Buat `src/app/page.tsx` yang me-redirect ke `/kk`.
+- [x] Buat `src/app/upload/page.tsx`:
   - Dropzone upload gambar KK + preview + tombol `"Proses & Ekstrak Data"` + loading state.
   - Simpan hasil ekstraksi & preview gambar (base64/DataURL) ke `sessionStorage`, lalu redirect ke `/confirm`.
-- [ ] Buat `src/app/confirm/page.tsx`:
+- [x] Buat `src/app/confirm/page.tsx`:
   - Layout split-screen: kiri preview gambar KK asli (dengan tombol zoom), kanan form editable (`react-hook-form` + `useFieldArray`).
   - Fitur tambah baris anggota, hapus baris anggota, dan tombol `"Simpan ke Database"` (`POST /api/py/kk`) yang redirect ke `/kk/[id]`.
 
@@ -147,14 +147,14 @@
 
 ### Checklist Tugas
 
-- [ ] Buat komponen modal reusable:
+- [x] Buat komponen modal reusable:
   - `src/components/EditIdentitasModal.tsx` (edit data `tbl_identitasKK`)
   - `src/components/AnggotaFormModal.tsx` (tambah & edit data `tbl_anggotaKeluargaKK`)
-- [ ] Buat `src/app/kk/page.tsx`:
+- [x] Buat `src/app/kk/page.tsx`:
   - Tabel khusus menampilkan `tbl_identitasKK` saja (No. KK, Nama Kepala Keluarga, Alamat, Kecamatan/Kota, Jumlah Anggota, Aksi).
   - Search bar (`?search=`) dengan debounce.
   - Aksi: Link `"Lihat Anggota"` (`/kk/[id]`), `"Edit Identitas"`, dan `"Hapus KK"` (dialog konfirmasi).
-- [ ] Buat `src/app/kk/[id]/page.tsx`:
+- [x] Buat `src/app/kk/[id]/page.tsx`:
   - Kartu informasi lengkap `tbl_identitasKK`, tombol preview gambar KK, tombol Edit Identitas, dan tombol Hapus KK.
   - Tabel daftar `tbl_anggotaKeluargaKK` milik KK tersebut.
   - Tombol `"+ Tambah Anggota"`, aksi `"Edit"` dan `"Hapus"` pada setiap baris anggota.
