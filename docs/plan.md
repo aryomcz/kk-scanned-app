@@ -93,15 +93,15 @@
 
 ### Checklist Tugas
 
-- [ ] Buat `api/services/supabase_service.py`:
+- [x] Buat `api/services/supabase_service.py`:
   - Upload gambar base64/bytes ke bucket `kk-images` dan kembalikan `public_url`.
   - Hapus gambar dari bucket saat KK dihapus.
   - Fungsi CRUD untuk `tbl_identitasKK` (termasuk hitung `jumlah_anggota` dan filter `?search=`).
   - Fungsi CRUD untuk `tbl_anggotaKeluargaKK`.
   - Tangkap error constraint unik PostgreSQL (`23505`) dan ubah menjadi HTTP `409 Conflict` dengan pesan jelas (misal: `"No. KK atau NIK sudah terdaftar"`).
-- [ ] Buat `api/routers/kk.py`: `GET /api/py/kk`, `POST /api/py/kk`, `GET /api/py/kk/{id}`, `PUT /api/py/kk/{id}`, `DELETE /api/py/kk/{id}`.
-- [ ] Buat `api/routers/anggota.py`: `POST /api/py/kk/{id}/anggota`, `PUT /api/py/anggota/{anggota_id}`, `DELETE /api/py/anggota/{anggota_id}`.
-- [ ] Daftarkan kedua router di `api/index.py`.
+- [x] Buat `api/routers/kk.py`: `GET /api/py/kk`, `POST /api/py/kk`, `GET /api/py/kk/{id}`, `PUT /api/py/kk/{id}`, `DELETE /api/py/kk/{id}`.
+- [x] Buat `api/routers/anggota.py`: `POST /api/py/kk/{id}/anggota`, `PUT /api/py/anggota/{anggota_id}`, `DELETE /api/py/anggota/{anggota_id}`.
+- [x] Daftarkan kedua router di `api/index.py`.
 
 ### Kriteria Selesai (Acceptance Criteria)
 
